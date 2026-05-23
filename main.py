@@ -13,8 +13,6 @@ SALT_LENGTH = 16
 HMAC_LENGTH = 32  # SHA256 digest = 32 bytes
 
 saved_password = None
-
-
 # ── Key generation ─────────────────────────────────────────
 
 def get_fernet_key(password: str, salt: bytes) -> bytes:
