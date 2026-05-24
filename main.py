@@ -6,6 +6,8 @@ from argon2.low_level import hash_secret_raw, Type
 from cryptography.fernet import Fernet
 from tkinter import filedialog, messagebox
 from HMAC_integrity import init_hmac_auth, update_hmac_chunk, finalize_hmac
+from pathlib import Path
+
 
 # --- Fixed Specifications Constants ---
 TIME_COST   = 3
@@ -15,7 +17,6 @@ HASH_LENGTH = 32
 SALT_LENGTH = 16
 HMAC_LENGTH = 32  # SHA256 digest = 32 bytes
 CHUNK_SIZE  = 64 * 1024  # Max 64KB chunks to prevent RAM crash
-
 # Global variables tracking operational states
 saved_password = None
 file_path = None
@@ -191,29 +192,46 @@ class SecureCryptoApp(ctk.CTk):
         if os.path.getsize(file_path) == 0:
             messagebox.showwarning("Empty File Warning", "Processing cancelled: Selected target file contains 0 Bytes.")
             return
+        
+        if mode == "encrypt":
+            suggested = os.path.basename(file_path) + ".enc"
+            save_path = filedialog.asksaveasfilename(
+                title="Save Encrypted File As",
+                initialfile=suggested,
+                defaultextension=".enc",
+                filetypes=[("Encrypted Files", "*.enc"), ("All Files", "*.*")]
+            )
+        else:
+            suggested = os.path.basename(file_path).removesuffix(".enc")
+            save_path = filedialog.asksaveasfilename(
+                title="Save Decrypted File As",
+                initialfile=suggested,
+                filetypes=[("All Files", "*.*")]
+            )
+
+        if not save_path:  # User cancelled the dialog
+         return
 
         self.set_ui_lockstate(True)
-        worker = threading.Thread(target=self.process_cryptography_stream, args=(mode,))
+        worker = threading.Thread(target=self.process_cryptography_stream, args=(mode, save_path))
         worker.daemon = True
         worker.start()
 
     # --- Refactored Non-Blocking Streaming Crypto Engine Execution Loop ---
-    def process_cryptography_stream(self, mode):
+    def process_cryptography_stream(self, mode, save_path):
         global file_path
         try:
             total_size = os.path.getsize(file_path)
             bytes_processed = 0
             
             if mode == "encrypt":
-                os.makedirs("Encrypted", exist_ok=True)
+                enc_file_path = save_path
+                temp_protected_path = save_path + ".tmp"
                 salt = os.urandom(SALT_LENGTH)
                 
                 fernet_key = get_fernet_key(saved_password, salt)
                 hmac_key = get_hmac_key(saved_password, salt)
                 fernet = Fernet(fernet_key)
-                
-                enc_file_path = os.path.join("Encrypted", os.path.basename(file_path) + ".enc")
-                temp_protected_path = enc_file_path + ".tmp"
                 
                 # Write salt and stream blocks into temporary container file
                 with open(file_path, 'rb') as source, open(temp_protected_path, 'wb') as dest:
@@ -246,13 +264,8 @@ class SecureCryptoApp(ctk.CTk):
                 messagebox.showinfo("Success", f"File encrypted successfully!\nSaved to: {enc_file_path}")
 
             elif mode == "decrypt":
-                os.makedirs("Decrypted", exist_ok=True)
-                enc_path = file_path if file_path.endswith(".enc") else os.path.join("Encrypted", os.path.basename(file_path) + ".enc")
-                
-                # Edge Case 4: Preserve and smooth extract initial name configuration tags
-                original_name = os.path.basename(enc_path[:-4])
-                out_path = os.path.join("Decrypted", original_name)
-                
+                out_path = save_path
+                enc_path = file_path
                 enc_total_size = os.path.getsize(enc_path)
                 
                 # Stream verify the signature first to prevent padding oracle processing risks
