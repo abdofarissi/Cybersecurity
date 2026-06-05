@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../Desktop/Cybersecurity-main/Cybersecurity"
+		},
+		{
+			"path": "../../Desktop/Cybersecurity-main/dist"
+		},
+		{
+			"path": "../../Desktop/Cybersecurity-main/Encrypted"
+		},
+		{
+			"path": "../../Desktop/Cybersecurity-main/.vscode"
+		},
+		{
+			"path": "../../Desktop/Cybersecurity-main/__pycache__"
+		},
+		{
+			"path": "../../Desktop/Cybersecurity-main/build"
+		}
+	],
+	"settings": {}
+}
