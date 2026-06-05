@@ -88,23 +88,23 @@ The compiled executable will be available in the `dist/` directory.
 │                      ENCRYPTION FLOW                             │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key     │
+│  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key      │
 │                                                                  │
-│  Password ──► Argon2id(salt⊕0xFF) ──► HMAC Key                 │
+│  Password ──► Argon2id(salt⊕0xFF) ──► HMAC Key                  │
 │                                                                  │
 │  Plaintext File                                                  │
 │       │                                                          │
 │       ▼                                                          │
-│  ┌─────────┐    ┌──────────────┐    ┌──────────────────┐        │
-│  │ 64KB    │───►│ Fernet       │───►│ Encrypted Chunk  │        │
-│  │ Chunks  │    │ Encrypt      │    │ + HMAC Update    │        │
-│  └─────────┘    └──────────────┘    └──────────────────┘        │
+│  ┌─────────┐    ┌──────────────┐    ┌──────────────────┐         │
+│  │ 64KB    │───►│ Fernet       │───►│ Encrypted Chunk  │         │
+│  │ Chunks  │    │ Encrypt      │    │ + HMAC Update    │         │
+│  └─────────┘    └──────────────┘    └──────────────────┘         │
 │                                             │                    │
 │                                             ▼                    │
-│                          ┌──────────────────────────────┐       │
-│                          │  salt(16B) ‖ ciphertext ‖    │       │
-│                          │  HMAC-SHA256(32B)            │       │
-│                          └──────────────────────────────┘       │
+│                          ┌──────────────────────────────┐        │
+│                          │  salt(16B) ‖ ciphertext ‖    │        │
+│                          │  HMAC-SHA256(32B)            │        │
+│                          └──────────────────────────────┘        │
 │                                    .enc file                     │
 └──────────────────────────────────────────────────────────────────┘
 ```
