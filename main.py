@@ -6,6 +6,8 @@ from argon2.low_level import hash_secret_raw, Type
 from cryptography.fernet import Fernet
 from tkinter import filedialog, messagebox
 from HMAC_integrity import init_hmac_auth, update_hmac_chunk, finalize_hmac
+from pathlib import Path
+
 
 # --- Fixed Specifications Constants ---
 TIME_COST   = 3
@@ -15,7 +17,6 @@ HASH_LENGTH = 32
 SALT_LENGTH = 16
 HMAC_LENGTH = 32  # SHA256 digest = 32 bytes
 CHUNK_SIZE  = 64 * 1024  # Max 64KB chunks to prevent RAM crash
-
 # Global variables tracking operational states
 saved_password = None
 file_path = None
@@ -65,7 +66,7 @@ def compute_hmac_streaming(protected_file_path: str, hmac_key: bytes) -> bytes:
 class SecureCryptoApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        
+        self.cancel_event = threading.Event()
         self.title("Aegis File Cryptosystem")
         self.geometry("600x560")
         self.resizable(False, False)
@@ -121,7 +122,16 @@ class SecureCryptoApp(ctk.CTk):
         self.progress_bar = ctk.CTkProgressBar(self.container)
         self.progress_bar.pack(fill="x", padx=20, pady=(0, 15))
         self.progress_bar.set(0)
-
+        
+        #Cancel button
+        self.cancel_btn = ctk.CTkButton(
+            self.container, text="✕ Cancel Operation",
+            fg_color="#555555", hover_color="#333333",
+            font=ctk.CTkFont(weight="bold"),
+            state="disabled",
+            command=self.cancel_operation
+        )
+        self.cancel_btn.pack(fill="x", padx=20, pady=(0, 5))
         # 4. Global Structural Control Execution Buttons
         self.action_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.action_frame.pack(fill="x", padx=25, pady=(10, 20))
@@ -159,6 +169,7 @@ class SecureCryptoApp(ctk.CTk):
         self.pass_entry.delete(0, "end")
         self.confirm_entry.delete(0, "end")
 
+
     def update_progress(self, bytes_processed, total_size):
         
         if total_size == 0:
@@ -171,12 +182,18 @@ class SecureCryptoApp(ctk.CTk):
         self.progress_label.configure(text=f"Processing status: {percentage}% ({bytes_processed // (1024*1024)} MB / {total_size // (1024*1024)} MB)")
         self.update_idletasks()
 
+    def cancel_operation(self):
+        self.cancel_event.set()
+        self.cancel_btn.configure(state="disabled")
+        self.progress_label.configure(text="Cancelling... please wait.", text_color="#FFA500")
+
     def set_ui_lockstate(self, locked):
         state = "disabled" if locked else "normal"
         self.file_btn.configure(state=state)
         self.save_pwd_btn.configure(state=state)
         self.encrypt_btn.configure(state=state)
         self.decrypt_btn.configure(state=state)
+        self.cancel_btn.configure(state="normal" if locked else "disabled")
 
     def launch_worker_thread(self, mode):
        
@@ -191,29 +208,47 @@ class SecureCryptoApp(ctk.CTk):
         if os.path.getsize(file_path) == 0:
             messagebox.showwarning("Empty File Warning", "Processing cancelled: Selected target file contains 0 Bytes.")
             return
+        
+        if mode == "encrypt":
+            suggested = os.path.basename(file_path) + ".enc"
+            save_path = filedialog.asksaveasfilename(
+                title="Save Encrypted File As",
+                initialfile=suggested,
+                defaultextension=".enc",
+                filetypes=[("Encrypted Files", "*.enc"), ("All Files", "*.*")]
+            )
+        else:
+            suggested = os.path.basename(file_path).removesuffix(".enc")
+            save_path = filedialog.asksaveasfilename(
+                title="Save Decrypted File As",
+                initialfile=suggested,
+                filetypes=[("All Files", "*.*")]
+            )
 
+        if not save_path:  # User cancelled the dialog
+         return
+        
+        self.cancel_event.clear()
         self.set_ui_lockstate(True)
-        worker = threading.Thread(target=self.process_cryptography_stream, args=(mode,))
+        worker = threading.Thread(target=self.process_cryptography_stream, args=(mode, save_path))
         worker.daemon = True
         worker.start()
 
     # --- Refactored Non-Blocking Streaming Crypto Engine Execution Loop ---
-    def process_cryptography_stream(self, mode):
+    def process_cryptography_stream(self, mode, save_path):
         global file_path
         try:
             total_size = os.path.getsize(file_path)
             bytes_processed = 0
             
             if mode == "encrypt":
-                os.makedirs("Encrypted", exist_ok=True)
+                enc_file_path = save_path
+                temp_protected_path = save_path + ".tmp"
                 salt = os.urandom(SALT_LENGTH)
                 
                 fernet_key = get_fernet_key(saved_password, salt)
                 hmac_key = get_hmac_key(saved_password, salt)
                 fernet = Fernet(fernet_key)
-                
-                enc_file_path = os.path.join("Encrypted", os.path.basename(file_path) + ".enc")
-                temp_protected_path = enc_file_path + ".tmp"
                 
                 # Write salt and stream blocks into temporary container file
                 with open(file_path, 'rb') as source, open(temp_protected_path, 'wb') as dest:
@@ -222,7 +257,8 @@ class SecureCryptoApp(ctk.CTk):
                         chunk = source.read(CHUNK_SIZE)
                         if not chunk:
                             break
-                        
+                        if self.cancel_event.is_set():
+                            break
                         # Process chunks to maintain small system RAM usage footprint
                         encrypted_chunk = fernet.encrypt(chunk)
                         # Prepend length of sub-token chunk to let decrypt stream loop split it safely later
@@ -230,7 +266,18 @@ class SecureCryptoApp(ctk.CTk):
                         
                         bytes_processed += len(chunk)
                         self.update_progress(bytes_processed, total_size)
-                
+                if self.cancel_event.is_set():
+
+                    if os.path.exists(temp_protected_path):
+
+                        os.remove(temp_protected_path)
+
+                    messagebox.showwarning("Cancelled",
+
+                        "Encryption cancelled. Incomplete file removed.")
+
+                    return
+
                 # Dynamic calculated streaming update across overall file layout blocks for final signature placement
                 self.progress_label.configure(text="Generating authenticated HMAC validation seal...", text_color="#A83232")
                 tag = compute_hmac_streaming(temp_protected_path, hmac_key)
@@ -246,13 +293,8 @@ class SecureCryptoApp(ctk.CTk):
                 messagebox.showinfo("Success", f"File encrypted successfully!\nSaved to: {enc_file_path}")
 
             elif mode == "decrypt":
-                os.makedirs("Decrypted", exist_ok=True)
-                enc_path = file_path if file_path.endswith(".enc") else os.path.join("Encrypted", os.path.basename(file_path) + ".enc")
-                
-                # Edge Case 4: Preserve and smooth extract initial name configuration tags
-                original_name = os.path.basename(enc_path[:-4])
-                out_path = os.path.join("Decrypted", original_name)
-                
+                out_path = save_path
+                enc_path = file_path
                 enc_total_size = os.path.getsize(enc_path)
                 
                 # Stream verify the signature first to prevent padding oracle processing risks
@@ -291,6 +333,8 @@ class SecureCryptoApp(ctk.CTk):
                         chunk_len_bytes = source.read(4)
                         if not chunk_len_bytes:
                             break
+                        if self.cancel_event.is_set():
+                            break
                         chunk_len = int.from_bytes(chunk_len_bytes, byteorder='big')
                         
                         encrypted_chunk = source.read(chunk_len)
@@ -302,6 +346,12 @@ class SecureCryptoApp(ctk.CTk):
                         self.update_progress(bytes_processed, enc_total_size - SALT_LENGTH - HMAC_LENGTH)
                         bytes_to_read -= (4 + chunk_len)
                         
+                    if self.cancel_event.is_set():
+                        if os.path.exists(out_path):
+                            os.remove(out_path)
+                        messagebox.showwarning("Cancelled", "Decryption was cancelled. Incomplete file removed.")
+                        return
+                    
                 messagebox.showinfo("Success", f"Integrity Verified! File decrypted successfully.\nSaved to: {out_path}")
 
         except ValueError:

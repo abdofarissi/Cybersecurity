@@ -42,6 +42,18 @@
 
 ---
 
+## 🖥️ UI Preview
+
+<div align="center">
+
+<img src="assets/screenshot.png" alt="Aegis Security Interface" width="480"/>
+
+*The Aegis Security Interface — dark-themed desktop GUI running as a standalone `.exe`*
+
+</div>
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -91,10 +103,23 @@ The compiled executable will be available in the `dist/` directory.
 │  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key      │
 │                                                                  │
 │  Password ──► Argon2id(salt⊕0xFF) ──► HMAC Key                  │
+│  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key      │
+│                                                                  │
+│  Password ──► Argon2id(salt⊕0xFF) ──► HMAC Key                  │
 │                                                                  │
 │  Plaintext File                                                  │
 │       │                                                          │
 │       ▼                                                          │
+│  ┌─────────┐    ┌──────────────┐    ┌──────────────────┐         │
+│  │ 64KB    │───►│ Fernet       │───►│ Encrypted Chunk  │         │
+│  │ Chunks  │    │ Encrypt      │    │ + HMAC Update    │         │
+│  └─────────┘    └──────────────┘    └──────────────────┘         │
+│                                             │                    │
+│                                             ▼                    │
+│                          ┌──────────────────────────────┐        │
+│                          │  salt(16B) ‖ ciphertext ‖    │        │
+│                          │  HMAC-SHA256(32B)            │        │
+│                          └──────────────────────────────┘        │
 │  ┌─────────┐    ┌──────────────┐    ┌──────────────────┐         │
 │  │ 64KB    │───►│ Fernet       │───►│ Encrypted Chunk  │         │
 │  │ Chunks  │    │ Encrypt      │    │ + HMAC Update    │         │
