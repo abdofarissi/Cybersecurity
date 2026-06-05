@@ -42,6 +42,18 @@
 
 ---
 
+## 🖥️ UI Preview
+
+<div align="center">
+
+<img src="assets/screenshot.png" alt="Aegis Security Interface" width="480"/>
+
+*The Aegis Security Interface — dark-themed desktop GUI running as a standalone `.exe`*
+
+</div>
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
