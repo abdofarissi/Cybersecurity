@@ -218,9 +218,16 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-## 👤 Author
+## 👥 Team
 
-**Abdo Farissi** — [@abdofarissi](https://github.com/abdofarissi)
+This project was collaboratively developed by a four-member team as part of a cybersecurity academic project.
+
+| Member | Role | Contributions |
+|---|---|---|
+| **Abderrahmane Farissi** <br/> [@abdofarissi](https://github.com/abdofarissi) | 🔐 Encryption & Decryption Engineer | Implemented the core encryption and decryption logic using Fernet (AES-256); developed the primary cryptographic functions; connected file I/O handling to the main application pipeline; integrated HMAC security into the encryption flow; primary GitHub contributor and project maintainer |
+| **Khawla Moutawakkil** <br/> [@khawlamoutawakkil](https://github.com/khawlamoutawakkil) | 🎨 UI/UX Designer | Designed the application's user interface and overall user experience; responsible for the dark-themed CustomTkinter layout, widget arrangement, and visual consistency of the desktop GUI |
+| **Saif Eddine Zaoui** | 🔏 HMAC Integration Engineer | Led the integration of the HMAC-SHA256 integrity verification layer; developed the `HMAC_integrity.py` module responsible for streaming message authentication and tamper detection during both encryption and decryption |
+| **Meriem Saber** | 🛡️ Vulnerability Tester & Documentation Writer | Conducted security testing to identify potential vulnerabilities in the cryptographic pipeline and application logic; contributed to writing the project summary and technical documentation |
 
 ---
 
@@ -228,6 +235,6 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **If you find this project useful, please consider giving it a ⭐**
 
-Made with 🔐 and ❤️ for the cybersecurity community
+Made with 🔐 and ❤️ by the Aegis team
 
 </div>
