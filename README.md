@@ -204,7 +204,7 @@ Cybersecurity/
 1. Launch the application (`python main.py`)
 2. Click **Browse** to select the target file
 3. Enter and confirm your encryption password
-4. Click **Encrypt** — the output `.enc` file is saved in the `Encrypted/` directory
+4. Click **Encrypt** — the output `.enc` file is saved in a directory chosen by the user.
 
 ### Decrypting a File
 
