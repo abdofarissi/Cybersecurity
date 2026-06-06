@@ -15,10 +15,10 @@ jobs:
     - name: Install dependencies
       run: pip install pyinstaller customtkinter cryptography argon2-cffi pycryptodome
       
-    - name: Build EXE
-      run: pyinstaller --noconfirm --onedir --windowed --clean --name "Aegis_Crypto" main.py
+    - name: Build EXE with Custom Icon
+      run: pyinstaller --noconfirm --onedir --windowed --clean --icon="icon.ico" --name "Aegis_Crypto" main.py
       
-    - name: Upload EXE
+    - name: Upload Aegis_Crypto Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Aegis_Crypto-Windows
