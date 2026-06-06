@@ -13,7 +13,7 @@ jobs:
         python-version: '3.10'
         
     - name: Install dependencies
-      run: pip install pyinstaller customtkinter cryptography argon2-cffi pycryptodome
+      run: pip install pyinstaller pillow customtkinter cryptography argon2-cffi pycryptodome
       
     - name: Build EXE with Custom Icon
       run: pyinstaller --noconfirm --onedir --windowed --clean --icon="icon.ico" --name "Aegis_Crypto" main.py
