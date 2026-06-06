@@ -84,14 +84,12 @@
 
 ### Build Standalone Executable (Optional)
 
-```bash
-pip install pyinstaller
-pyinstaller main.spec
-```
+To easily generate a standalone Windows executable (`.exe`) with the custom icon, simply run the included batch script:
 
-The compiled executable will be available in the `dist/` directory.
+1. Double-click the **`build.bat`** file in the project folder.
+2. Wait for the process to finish.
+3. Your compiled `Aegis_Crypto.exe` application will be available in the **`dist/`** directory!
 
----
 
 ## 🔧 How It Works
 
