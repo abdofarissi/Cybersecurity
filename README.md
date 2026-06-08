@@ -96,14 +96,9 @@ To easily generate a standalone Windows executable (`.exe`) with the custom icon
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                      ENCRYPTION FLOW                             │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key      │
-│                                                                  │
+├──────────────────────────────────────────────────────────────────┤                                                                                                                                
 │  Password ──► Argon2id(salt⊕0xFF) ──► HMAC Key                  │
-│  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key      │
-│                                                                  │
-│  Password ──► Argon2id(salt⊕0xFF) ──► HMAC Key                  │
+│  Password ──► Argon2id(salt) ──► 256-bit Key ──► Fernet Key      │                                                                    
 │                                                                  │
 │  Plaintext File                                                  │
 │       │                                                          │
