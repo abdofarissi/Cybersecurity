@@ -37,7 +37,7 @@
 | 📂 **File-Based Operations** | Encrypt and decrypt any file type — documents, images, archives, and more |
 | 🧵 **Multi-Threaded Processing** | Background threading keeps the UI responsive during heavy cryptographic operations |
 | 💾 **Chunked Streaming** | Processes files in 64KB chunks to prevent RAM overflow on large files |
-| 🎨 **Modern Dark UI** | Sleek CustomTkinter interface with dark mode and intuitive layout |
+| 🎨 **Modern UI** | Sleek CustomTkinter interface with dark mode and intuitive layout |
 | 📦 **Standalone Executable** | PyInstaller-ready — build a single `.exe` for distribution |
 
 ---
@@ -243,7 +243,7 @@ This project was collaboratively developed by a four-member team as part of a cy
 | Member | Role | Contributions |
 |---|---|---|
 | **Abderrahmane Farissi** <br/> [@abdofarissi](https://github.com/abdofarissi) | 🔐 Encryption & Decryption Engineer | Implemented the core encryption and decryption logic using Fernet (AES-256); developed the primary cryptographic functions; connected file I/O handling to the main application pipeline; integrated HMAC security into the encryption flow; primary GitHub contributor and project maintainer |
-| **Khawla Moutawakkil** <br/> [@khawlamoutawakkil](https://github.com/khawlamoutawakkil) | 🎨 UI/UX Designer | Designed the application's user interface and overall user experience; responsible for the dark-themed CustomTkinter layout, widget arrangement, and visual consistency of the desktop GUI |
+| **Khawla Moutawakkil** <br/> [@khawlamoutawakkil](https://github.com/khawlamoutawakkil) | 🎨 UI/UX Designer | Designed the application's user interface and overall user experience; responsible for the CustomTkinter theme layout, widget arrangement, and visual consistency of the desktop GUI |
 | **Saif Eddine Zaoui** | 🔏 HMAC Integration Engineer | Led the integration of the HMAC-SHA256 integrity verification layer; developed the `HMAC_integrity.py` module responsible for streaming message authentication and tamper detection during both encryption and decryption |
 | **Meriem Saber** | 🛡️ Vulnerability Tester & Documentation Writer | Conducted security testing to identify potential vulnerabilities in the cryptographic pipeline and application logic; contributed to writing the project summary and technical documentation |
 
